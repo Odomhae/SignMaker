@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">SignMaker</string>
+    <string name="redraw">Redraw</string>
+    <string name="share">Share</string>
 </resources>

@@ -1,26 +1,24 @@
 package com.odom.signmaker
 
-import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Canvas
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
-import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.odom.signmaker.Utils.getImageUri
 import com.odom.signmaker.databinding.ActivityMainBinding
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
+
+    var permission_list = arrayOf<String>(
+        android.Manifest.permission.READ_EXTERNAL_STORAGE,
+        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +28,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(view)
 
         binding.btRedraw.setOnClickListener {
-            Toast.makeText(this, "sef" , Toast.LENGTH_SHORT).show()
             binding.signaturePad.clear()
         }
 
@@ -41,10 +38,11 @@ class MainActivity : AppCompatActivity() {
             val signBitmap = binding.signaturePad.signatureBitmap
             val signBitSvg = binding.signaturePad.signatureSvg
 
+            checkPermission()
+
             val screenshotUri: Uri = Uri.parse(
                 getImageUri(
-                    this,
-                    signBitmap//viewToBitmap(binding.signaturePad)
+                    this, signBitmap
                 ).toString()
             )
 
@@ -53,45 +51,39 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent.createChooser(intent, "Share image"))
         }
 
-
     }
 
-    private fun saveImageExternal(image: Bitmap): Uri? {
-        //TODO - Should be processed in another thread
-        var uri: Uri? = null
-
-        try {
-            val file = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "to-share.png")
-            val stream = FileOutputStream(file)
-            image.compress(Bitmap.CompressFormat.PNG, 90, stream)
-            stream.close()
-            uri = Uri.fromFile(file)
-
-        } catch (e: IOException) {
-            Log.d("TAG", "IOException while trying to write file for sharing: " + e.message)
+    fun checkPermission() {
+        for (permission in permission_list) {
+            //권한 허용 여부를 확인한다.
+            val chk = checkCallingOrSelfPermission(permission)
+            if (chk == PackageManager.PERMISSION_DENIED) {
+                //권한 허용을여부를 확인하는 창을 띄운다
+                requestPermissions(permission_list, 0)
+            }
         }
 
-        return uri
     }
 
-    // 뷰를 비트맵으로 변환
-    fun viewToBitmap(view: View): Bitmap {
-        val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String?>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        view.draw(canvas)
-        return bitmap
+        if (requestCode == 0) {
+            for (i in grantResults.indices) {
+                //허용됬다면
+                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "sazz" , Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(applicationContext, "앱 권한 설정하세요", Toast.LENGTH_LONG).show()
+                    finish()
+                }
+            }
+        }
     }
 
-    // 비트맵 이미지 Uri 가져오기
-    // 권한 설정 요 EXTERNAL_STORAGE
-    fun getImageUri(context: Context, image: Bitmap): Uri? {
-        val bytes = ByteArrayOutputStream()
-        image.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
 
-        val path: String = MediaStore.Images.Media.insertImage(
-            context.contentResolver, image, "Title", null )
-
-        return Uri.parse(path)
-    }
 }
