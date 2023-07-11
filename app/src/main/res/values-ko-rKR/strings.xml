@@ -2,5 +2,8 @@
 <resources>
     <string name="app_name">서명만들기_무료 싸인만들기</string>
     <string name="redraw">다시 그리기</string>
-    <string name="share">공유하기</string>
+    <string name="save">저장하기</string>
+    <string name="save_success">SignMaker 폴더에 저장했습니다</string>
+    <string name="save_failed">저장 실패했습니다</string>
+
 </resources>

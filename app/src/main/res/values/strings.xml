@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">SignMaker</string>
     <string name="redraw">Redraw</string>
-    <string name="share">Share</string>
+    <string name="save">Save</string>
+    <string name="save_success">Image saved to SignMaker folder</string>
+    <string name="save_failed">Failed to save image</string>
 </resources>
