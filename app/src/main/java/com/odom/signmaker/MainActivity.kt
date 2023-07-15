@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.widget.Toast
@@ -17,11 +18,18 @@ import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
+    lateinit var signBitmap : Bitmap
 
-    var permission_list = arrayOf(
-        android.Manifest.permission.READ_EXTERNAL_STORAGE,
-        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-    )
+    var permission_list = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+        arrayOf(
+            android.Manifest.permission.READ_MEDIA_IMAGES
+        )
+    }else{
+        arrayOf(
+            android.Manifest.permission.READ_EXTERNAL_STORAGE,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,46 +58,74 @@ class MainActivity : AppCompatActivity() {
 
         binding.btSave.setOnClickListener {
 
-            val signBitmap = binding.signaturePad.signatureBitmap
-
+            signBitmap = binding.signaturePad.signatureBitmap
             checkPermission()
-
-            val directory = File(Environment.getExternalStorageDirectory(), "SignMaker")
-            directory.mkdirs()
-
-            val fileName =  System.currentTimeMillis().toString() + ".png"
-            val file = File(directory, fileName)
-
-            try {
-                val outputStream = FileOutputStream(file)
-                signBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-                outputStream.flush()
-                outputStream.close()
-
-                // Notify the media scanner about the new image
-                val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-                val contentUri = Uri.fromFile(file)
-                mediaScanIntent.data = contentUri
-                sendBroadcast(mediaScanIntent)
-
-                Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT).show()
-            } catch (e: IOException) {
-                e.printStackTrace()
-                Toast.makeText(this, R.string.save_failed, Toast.LENGTH_SHORT).show()
-            }
-
         }
 
     }
 
+    fun saveImg(bitmap: Bitmap) {
+
+        val directory = createAppDirectoryInDownloads()
+        val fileName =  System.currentTimeMillis().toString() + ".png"
+        val file = File(directory, fileName)
+
+        try {
+            val outputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            outputStream.flush()
+            outputStream.close()
+
+            // Notify the media scanner about the new image
+            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+            val contentUri = Uri.fromFile(file)
+            mediaScanIntent.data = contentUri
+            sendBroadcast(mediaScanIntent)
+
+            Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT).show()
+
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Toast.makeText(this, R.string.save_failed, Toast.LENGTH_SHORT).show()
+        }
+
+    }
+
+    fun createAppDirectoryInDownloads(): File? {
+        val downloadsDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        val appDirectory = File(downloadsDirectory, "SignMaker")
+
+        if (!appDirectory.exists()) {
+            val directoryCreated = appDirectory.mkdir()
+            if (!directoryCreated) {
+                // Failed to create the directory
+                Toast.makeText(this, R.string.fail_create_folder , Toast.LENGTH_SHORT).show()
+                return null
+            } else {
+                Toast.makeText(this, R.string.success_create_folder , Toast.LENGTH_SHORT).show()
+
+
+            }
+        } else {
+            Toast.makeText(this, appDirectory.absolutePath , Toast.LENGTH_SHORT).show()
+        }
+
+        return appDirectory
+    }
+
     fun checkPermission() {
+        var res = true
         for (permission in permission_list) {
             //권한 허용 여부를 확인한다.
             val chk = checkCallingOrSelfPermission(permission)
             if (chk == PackageManager.PERMISSION_DENIED) {
-                //권한 허용을여부를 확인하는 창을 띄운다
                 requestPermissions(permission_list, 0)
+                res = false
             }
+        }
+
+        if (res) {
+            saveImg(signBitmap)
         }
 
     }
@@ -101,18 +137,22 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
+        var result = true
         if (requestCode == 0) {
             for (i in grantResults.indices) {
-                //허용됬다면
-                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(applicationContext, R.string.request_permission, Toast.LENGTH_LONG).show()
+                    result = false
+                }
+
+                if (result == true) {
+                    saveImg(signBitmap)
 
                 } else {
-                    Toast.makeText(applicationContext, "앱 권한 설정하세요", Toast.LENGTH_LONG).show()
                     finish()
                 }
             }
+
         }
     }
-
-
 }

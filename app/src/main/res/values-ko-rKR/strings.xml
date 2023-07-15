@@ -5,5 +5,9 @@
     <string name="save">저장하기</string>
     <string name="save_success">SignMaker 폴더에 저장했습니다</string>
     <string name="save_failed">저장 실패했습니다</string>
+    <string name="request_permission">앱 권한을 허용해주세요</string>
+    <string name="fail_create_folder">폴더 생성 실패</string>
+    <string name="success_create_folder">갤러리에 SignMaker 폴더가 생성되었습니다</string>
+
 
 </resources>
