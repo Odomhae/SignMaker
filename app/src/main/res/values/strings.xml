@@ -7,5 +7,6 @@
     <string name="request_permission">Please allow permission</string>
     <string name="fail_create_folder">Folder creation failed</string>
     <string name="success_create_folder">A SignMaker folder has been created in the gallery</string>
+    <string name="alert_press_close">Press once more to close the app</string>
 
 </resources>

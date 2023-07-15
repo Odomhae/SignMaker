@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.odom.signmaker.databinding.ActivityMainBinding
@@ -19,6 +20,21 @@ import java.io.IOException
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
     lateinit var signBitmap : Bitmap
+
+    // 뒤로가기 2번 종료
+    var backPressTime = 0
+    private val callback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            // 뒤로가기 클릭 시 실행시킬 코드
+            if (System.currentTimeMillis().toInt() - backPressTime > 2000){
+                backPressTime = System.currentTimeMillis().toInt()
+                Toast.makeText(this@MainActivity, R.string.alert_press_close , Toast.LENGTH_SHORT).show()
+            } else {
+                finish()
+            }
+        }
+    }
+
 
     var permission_list = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
         arrayOf(
@@ -38,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
 
         setContentView(view)
+        this.onBackPressedDispatcher.addCallback(this, callback)
 
         binding.signaturePad.setOnSignedListener(object : SignaturePad.OnSignedListener {
             override fun onStartSigning() {
