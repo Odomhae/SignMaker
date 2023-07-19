@@ -9,4 +9,10 @@
     <string name="success_create_folder">A SignMaker folder has been created in the gallery</string>
     <string name="alert_press_close">Press once more to close the app</string>
 
+    <string name="TEST_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="TEST_admob_app_id" translatable="false"> ca-app-pub-3940256099942544~3347511713</string>
+
+    <string name="REAL_banner_ad_unit_id" translatable="false">ca-app-pub-6729344454320392/5431659881</string>
+    <string name="REAL_admob_app_id" translatable="false">ca-app-pub-6729344454320392~8704690482</string>
+
 </resources>

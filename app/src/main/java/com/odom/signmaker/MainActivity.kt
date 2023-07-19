@@ -7,10 +7,15 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.util.DisplayMetrics
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.github.gcacace.signaturepad.views.SignaturePad
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.MobileAds
 import com.odom.signmaker.databinding.ActivityMainBinding
 import java.io.File
 import java.io.FileOutputStream
@@ -47,6 +52,20 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    // 광고
+    lateinit var mAdView : AdView
+    private val adSize: AdSize
+        get() {
+            val display = windowManager.defaultDisplay
+            val outMetrics = DisplayMetrics()
+            display.getMetrics(outMetrics)
+
+            val density = outMetrics.density
+            val adWidthPixels = outMetrics.widthPixels.toFloat()
+            val adWidth = (adWidthPixels / density).toInt()
+            return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +98,16 @@ class MainActivity : AppCompatActivity() {
             checkPermission()
         }
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        // load Banner AD
+        MobileAds.initialize(this) {}
+        mAdView = findViewById(R.id.adMobView)
+        val adRequest = AdRequest.Builder().build()
+        mAdView.loadAd(adRequest)
     }
 
     fun saveImg(bitmap: Bitmap) {
