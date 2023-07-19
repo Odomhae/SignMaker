@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.btSave.setOnClickListener {
 
-            signBitmap = binding.signaturePad.signatureBitmap
+            signBitmap = binding.signaturePad.transparentSignatureBitmap
             checkPermission()
         }
 
@@ -161,13 +161,13 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(applicationContext, R.string.request_permission, Toast.LENGTH_LONG).show()
                     result = false
                 }
+            }
 
-                if (result == true) {
-                    saveImg(signBitmap)
+            if (result == true) {
+                saveImg(signBitmap)
 
-                } else {
-                    finish()
-                }
+            } else {
+                finish()
             }
 
         }
