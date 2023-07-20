@@ -1,6 +1,5 @@
 package com.odom.signmaker
 
-import android.R.color
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -10,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.DisplayMetrics
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -28,7 +28,7 @@ import java.io.IOException
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
     lateinit var signBitmap : Bitmap
-    var defaultPenColor = R.color.black
+    //var defaultPenColor = R.color.black
 
     // 뒤로가기 2번 종료
     var backPressTime = 0
@@ -104,11 +104,12 @@ class MainActivity : AppCompatActivity() {
 
         binding.btChangecolor.setOnClickListener {
             ColorPickerDialog()
-                .withColor(resources.getColor(defaultPenColor)) // the default / initial color
+                .withColor(resources.getColor(R.color.black)) // the default / initial color
                 .withListener { dialog, color ->
                     binding.signaturePad.setPenColor(color)
-                    binding.tvPencolor.setTextColor((resources.getColor(color)))
-                    defaultPenColor = color
+                    //todo 230720
+//                    binding.tvPencolor.setTextColor((resources.getColor(color)))
+//                    defaultPenColor = color
                 }
                 .show(supportFragmentManager, "colorPicker")
         }

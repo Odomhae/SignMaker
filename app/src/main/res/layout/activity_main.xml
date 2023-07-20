@@ -15,19 +15,6 @@
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical">
 
-        <TextView
-                android:id="@+id/tv_pencolor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="20dp"
-                android:textColor="@color/black"
-                android:layout_gravity="center|center_vertical"
-                android:gravity="center_vertical"
-                android:textStyle="bold"
-                android:text="@string/currentSignColor">
-        </TextView>
-
         <Button
                 android:id="@+id/bt_changecolor"
                 android:layout_width="wrap_content"
