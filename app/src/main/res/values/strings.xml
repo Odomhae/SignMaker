@@ -2,6 +2,9 @@
     <string name="app_name">SignMaker_Make your signature</string>
     <string name="redraw">Redraw</string>
     <string name="save">Save</string>
+    <string name="changePenColor">Change Pen Color</string>
+    <string name="currentSignColor">Current Sign Color</string>
+    <string name="backgroundColor">Change Background Color</string>
     <string name="save_success">Image saved to SignMaker folder</string>
     <string name="save_failed">Failed to save image</string>
     <string name="request_permission">Please allow permission</string>

@@ -1,8 +1,10 @@
 package com.odom.signmaker
 
+import android.R.color
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -17,6 +19,7 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.odom.signmaker.databinding.ActivityMainBinding
+import me.jfenn.colorpickerdialog.dialogs.ColorPickerDialog
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -25,6 +28,7 @@ import java.io.IOException
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
     lateinit var signBitmap : Bitmap
+    var defaultPenColor = R.color.black
 
     // 뒤로가기 2번 종료
     var backPressTime = 0
@@ -96,6 +100,17 @@ class MainActivity : AppCompatActivity() {
 
             signBitmap = binding.signaturePad.transparentSignatureBitmap
             checkPermission()
+        }
+
+        binding.btChangecolor.setOnClickListener {
+            ColorPickerDialog()
+                .withColor(resources.getColor(defaultPenColor)) // the default / initial color
+                .withListener { dialog, color ->
+                    binding.signaturePad.setPenColor(color)
+                    binding.tvPencolor.setTextColor((resources.getColor(color)))
+                    defaultPenColor = color
+                }
+                .show(supportFragmentManager, "colorPicker")
         }
 
     }
