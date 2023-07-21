@@ -14,6 +14,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.drawToBitmap
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -103,7 +104,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.btSave.setOnClickListener {
 
-            signBitmap = binding.signaturePad.transparentSignatureBitmap
+            signBitmap = binding.signaturePad.transparentSignatureBitmap //  drawToBitmap()
             checkPermission()
         }
 
