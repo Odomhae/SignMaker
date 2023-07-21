@@ -2,6 +2,7 @@
     <string name="app_name">SignMaker_Make your signature</string>
     <string name="redraw">Redraw</string>
     <string name="save">Save</string>
+    <string name="signHere">Sign Here</string>
     <string name="changePenColor">Change Pen Color</string>
     <string name="currentSignColor">Current Sign Color</string>
     <string name="backgroundColor">Change Background Color</string>

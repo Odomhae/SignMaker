@@ -3,6 +3,7 @@
     <string name="app_name">서명만들기_무료 싸인만들기</string>
     <string name="redraw">다시 그리기</string>
     <string name="save">저장하기</string>
+    <string name="signHere">칸 안에 서명해주세요</string>
     <string name="changePenColor">싸인색 변경</string>
     <string name="currentSignColor">현재 싸인 색</string>
     <string name="backgroundColor">배경색 변경</string>

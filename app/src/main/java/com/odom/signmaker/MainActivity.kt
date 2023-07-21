@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -45,15 +46,13 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    var permission_list = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
-        arrayOf(
-            android.Manifest.permission.READ_MEDIA_IMAGES
-        )
-    }else{
+    var permission_list = if(Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU){
         arrayOf(
             android.Manifest.permission.READ_EXTERNAL_STORAGE,
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
+    } else {
+        null
     }
 
     // 광고
@@ -79,16 +78,22 @@ class MainActivity : AppCompatActivity() {
         setContentView(view)
         this.onBackPressedDispatcher.addCallback(this, callback)
 
+        binding.btSave.isEnabled = false
+
         binding.signaturePad.setOnSignedListener(object : SignaturePad.OnSignedListener {
             override fun onStartSigning() {
                 binding.btSave.isClickable = false
+                binding.btSave.isEnabled = false
+
             }
             override fun onSigned() {
                 binding.btSave.isClickable = true
+                binding.btSave.isEnabled = true
             }
 
             override fun onClear() {
                 binding.btSave.isClickable = false
+                binding.btSave.isEnabled = false
             }
         })
 
@@ -139,10 +144,13 @@ class MainActivity : AppCompatActivity() {
             outputStream.close()
 
             // Notify the media scanner about the new image
-            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-            val contentUri = Uri.fromFile(file)
-            mediaScanIntent.data = contentUri
-            sendBroadcast(mediaScanIntent)
+//            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+//            val contentUri = Uri.fromFile(file)
+//            mediaScanIntent.data = contentUri
+//            sendBroadcast(mediaScanIntent)
+
+            MediaScannerConnection.scanFile(this, arrayOf(file.toString()),
+                null, null)
 
             Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT).show()
 
@@ -169,7 +177,7 @@ class MainActivity : AppCompatActivity() {
 
             }
         } else {
-            Toast.makeText(this, appDirectory.absolutePath , Toast.LENGTH_SHORT).show()
+          //  Toast.makeText(this, appDirectory.absolutePath , Toast.LENGTH_SHORT).show()
         }
 
         return appDirectory
@@ -177,16 +185,21 @@ class MainActivity : AppCompatActivity() {
 
     fun checkPermission() {
         var res = true
-        for (permission in permission_list) {
-            //권한 허용 여부를 확인한다.
-            val chk = checkCallingOrSelfPermission(permission)
-            if (chk == PackageManager.PERMISSION_DENIED) {
-                requestPermissions(permission_list, 0)
-                res = false
+        if (permission_list != null) {
+            for (permission in permission_list!!) {
+                //권한 허용 여부를 확인한다.
+                val chk = checkCallingOrSelfPermission(permission)
+                if (chk == PackageManager.PERMISSION_DENIED) {
+                    requestPermissions(permission_list!!, 0)
+                    res = false
+                }
             }
-        }
 
-        if (res) {
+            if (res) {
+                saveImg(signBitmap)
+            }
+
+        } else {
             saveImg(signBitmap)
         }
 

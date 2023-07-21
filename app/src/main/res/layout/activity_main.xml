@@ -12,17 +12,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_gravity="center_vertical"
-            android:gravity="center_vertical">
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center"
+            android:gravity="center">
 
-        <Button
-                android:id="@+id/bt_changecolor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:text="@string/changePenColor"
-                android:layout_marginEnd="20dp" >
-        </Button>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:textColor="@color/black"
+            android:textSize="18dp"
+            android:text="@string/signHere" />
 
     </RelativeLayout>
 
@@ -48,10 +48,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_marginStart="20dp"
             android:text="@string/redraw">
 
 
+        </Button>
+
+        <Button
+            android:id="@+id/bt_changecolor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/bt_redraw"
+            android:layout_toLeftOf="@id/bt_save"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/changePenColor">
         </Button>
 
         <Button
@@ -59,7 +69,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="20dp"
             android:text="@string/save">
 
         </Button>
