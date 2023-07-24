@@ -24,6 +24,7 @@ import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.odom.signmaker.databinding.ActivityMainBinding
 import me.jfenn.colorpickerdialog.dialogs.ColorPickerDialog
+import me.jfenn.colorpickerdialog.views.picker.RGBPickerView
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -111,6 +112,10 @@ class MainActivity : AppCompatActivity() {
 
         binding.btChangecolor.setOnClickListener {
             ColorPickerDialog()
+                .withTitle(resources.getString(R.string.select_pen_color))
+                .clearPickers()
+                .withPicker(RGBPickerView::class.java)
+                .withAlphaEnabled(false)
                 .withColor(resources.getColor(R.color.black)) // the default / initial color
                 .withListener { dialog, color ->
                     binding.signaturePad.setPenColor(color)
