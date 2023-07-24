@@ -1,25 +1,27 @@
 package com.odom.signmaker
 
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.media.MediaScannerConnection
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.drawToBitmap
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.tasks.Task
+import com.google.android.play.core.review.ReviewInfo
+import com.google.android.play.core.review.ReviewManagerFactory
 import com.odom.signmaker.databinding.ActivityMainBinding
 import me.jfenn.colorpickerdialog.dialogs.ColorPickerDialog
 import java.io.File
@@ -30,15 +32,14 @@ import java.io.IOException
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
     lateinit var signBitmap : Bitmap
-    //var defaultPenColor = R.color.black
 
     // 뒤로가기 2번 종료
-    var backPressTime = 0
+    var backPressTime = 0L
     private val callback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             // 뒤로가기 클릭 시 실행시킬 코드
-            if (System.currentTimeMillis().toInt() - backPressTime > 2000){
-                backPressTime = System.currentTimeMillis().toInt()
+            if (System.currentTimeMillis() - backPressTime > 2000){
+                backPressTime = System.currentTimeMillis()
                 Toast.makeText(this@MainActivity, R.string.alert_press_close , Toast.LENGTH_SHORT).show()
             } else {
                 finish()
@@ -153,7 +154,18 @@ class MainActivity : AppCompatActivity() {
             MediaScannerConnection.scanFile(this, arrayOf(file.toString()),
                 null, null)
 
-            Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT).show()
+            val inflater = layoutInflater
+            val view: View = inflater.inflate(
+                R.layout.toast_image_layout,
+                findViewById<ViewGroup>(R.id.relativeLayout1)
+            )
+            val toast = Toast(applicationContext)
+            toast.view = view
+            toast.setGravity(Gravity.TOP, 0, 200)
+            toast.show()
+
+           // Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT).show()
+            reviewApp()
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -229,6 +241,24 @@ class MainActivity : AppCompatActivity() {
                 finish()
             }
 
+        }
+    }
+
+    private fun reviewApp() {
+        val manager = ReviewManagerFactory.create(this@MainActivity)
+        val request: Task<ReviewInfo> = manager.requestReviewFlow()
+        request.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val reviewInfo: ReviewInfo = task.result
+                manager.launchReviewFlow(this@MainActivity, reviewInfo)
+                    .addOnCompleteListener { task1: Task<Void?> ->
+                        if (task1.isSuccessful) {
+                            Log.d("TAG", "Review Success")
+                        }
+                    }
+            } else {
+                Log.d("TAG", "Review Error")
+            }
         }
     }
 }
