@@ -14,6 +14,11 @@
     <string name="success_create_folder">A SignMaker folder has been created in the gallery</string>
     <string name="alert_press_close">Press once more to close the app</string>
 
+    <string name="open_file">Open</string>
+    <string name="cancel">Cancel</string>
+    <string name="dark_theme_alert">Signature may not show clearly in dark mode.</string>
+
+
     <string name="TEST_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
     <string name="TEST_admob_app_id" translatable="false"> ca-app-pub-3940256099942544~3347511713</string>
 

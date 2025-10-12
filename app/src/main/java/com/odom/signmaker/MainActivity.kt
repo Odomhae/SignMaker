@@ -1,22 +1,31 @@
 package com.odom.signmaker
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
+import androidx.core.view.OnApplyWindowInsetsListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.tasks.Task
@@ -60,18 +69,6 @@ class MainActivity : AppCompatActivity() {
 
     // 광고
     lateinit var mAdView : AdView
-    private val adSize: AdSize
-        get() {
-            val display = windowManager.defaultDisplay
-            val outMetrics = DisplayMetrics()
-            display.getMetrics(outMetrics)
-
-            val density = outMetrics.density
-            val adWidthPixels = outMetrics.widthPixels.toFloat()
-            val adWidth = (adWidthPixels / density).toInt()
-            return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
-        }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,6 +76,28 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
 
         setContentView(view)
+
+        checkPermission()
+
+        // top, bottom padding
+        val contentView: View = this.findViewById(android.R.id.content)
+        ViewCompat.setOnApplyWindowInsetsListener(contentView, object : OnApplyWindowInsetsListener {
+            override fun onApplyWindowInsets(v: View, insets: WindowInsetsCompat): WindowInsetsCompat {
+                val innerPadding = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+                v.setPadding(0, innerPadding.top, 0, innerPadding.bottom)
+
+                return insets
+            }
+        })
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val insetsController = WindowInsetsControllerCompat(window, window.decorView)
+            insetsController.isAppearanceLightStatusBars = false
+         //   insetsController.isAppearanceLightNavigationBars = isLightStatusBars
+
+            window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.dark_blue))
+        }
+
         this.onBackPressedDispatcher.addCallback(this, callback)
 
         binding.btSave.isEnabled = false
@@ -105,9 +124,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btSave.setOnClickListener {
-
             signBitmap = binding.signaturePad.transparentSignatureBitmap //  drawToBitmap()
-            checkPermission()
+            saveImg(signBitmap)
+
+            binding.signaturePad.clear()
         }
 
         binding.btChangecolor.setOnClickListener {
@@ -172,6 +192,32 @@ class MainActivity : AppCompatActivity() {
            // Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT).show()
             reviewApp()
 
+            // 다이얼로그로 갤러리 열기 선택
+            val dialogView = layoutInflater.inflate(R.layout.custom_dialog, null)
+
+            val dialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create()
+
+            dialogView.findViewById<Button>(R.id.openGalleryButton).setOnClickListener {
+                val uri = FileProvider.getUriForFile(
+                    this,
+                    "${BuildConfig.APPLICATION_ID}.fileprovider",
+                    file
+                )
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.setDataAndType(uri, "image/*")
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                startActivity(intent)
+                dialog.dismiss()
+            }
+
+            dialogView.findViewById<Button>(R.id.cancelButton).setOnClickListener {
+                dialog.dismiss()
+            }
+
+            dialog.show()
+
         } catch (e: IOException) {
             e.printStackTrace()
             Toast.makeText(this, R.string.save_failed, Toast.LENGTH_SHORT).show()
@@ -202,23 +248,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun checkPermission() {
-        var res = true
         if (permission_list != null) {
             for (permission in permission_list!!) {
                 //권한 허용 여부를 확인한다.
                 val chk = checkCallingOrSelfPermission(permission)
                 if (chk == PackageManager.PERMISSION_DENIED) {
                     requestPermissions(permission_list!!, 0)
-                    res = false
                 }
             }
 
-            if (res) {
-                saveImg(signBitmap)
-            }
-
-        } else {
-            saveImg(signBitmap)
         }
 
     }
@@ -239,10 +277,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            if (result == true) {
-                saveImg(signBitmap)
-
-            } else {
+            if (result == false) {
                 finish()
             }
 
