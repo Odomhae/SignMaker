@@ -19,9 +19,11 @@
     <string name="dark_theme_alert">Signature may not show clearly in dark mode.</string>
 
 
+    <string name="TEST_FULLSCREEN_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
     <string name="TEST_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
     <string name="TEST_admob_app_id" translatable="false"> ca-app-pub-3940256099942544~3347511713</string>
 
+    <string name="REAL_FULLSCREEN_ad_unit_id" translatable="false">ca-app-pub-6729344454320392/6541910190</string>
     <string name="REAL_banner_ad_unit_id" translatable="false">ca-app-pub-6729344454320392/5431659881</string>
     <string name="REAL_admob_app_id" translatable="false">ca-app-pub-6729344454320392~8704690482</string>
 

@@ -27,7 +27,12 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManagerFactory
@@ -69,6 +74,8 @@ class MainActivity : AppCompatActivity() {
 
     // 광고
     lateinit var mAdView : AdView
+    private var mInterstitialAd: InterstitialAd? = null
+    private var signatureCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -156,6 +163,9 @@ class MainActivity : AppCompatActivity() {
         mAdView = findViewById(R.id.adMobView)
         val adRequest = AdRequest.Builder().build()
         mAdView.loadAd(adRequest)
+        
+        // load Interstitial AD
+        loadInterstitialAd()
     }
 
     fun saveImg(bitmap: Bitmap) {
@@ -217,6 +227,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             dialog.show()
+
+            // 서명 카운터 증가 및 전면광고 표시
+            signatureCount++
+            if (signatureCount % 4 == 0) {
+                showInterstitialAd()
+            }
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -299,6 +315,48 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Log.d("TAG", "Review Error")
             }
+        }
+    }
+    
+    private fun loadInterstitialAd() {
+        val adRequest = AdRequest.Builder().build()
+        
+        InterstitialAd.load(this, getString(R.string.TEST_FULLSCREEN_ad_unit_id), adRequest, object : InterstitialAdLoadCallback() {
+            override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                mInterstitialAd = interstitialAd
+                Log.d("TAG", "Interstitial ad loaded")
+            }
+            
+            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                Log.d("TAG", "Interstitial ad failed to load: ${loadAdError.message}")
+                mInterstitialAd = null
+            }
+        })
+    }
+    
+    private fun showInterstitialAd() {
+        if (mInterstitialAd != null) {
+            mInterstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+                override fun onAdDismissedFullScreenContent() {
+                    Log.d("TAG", "Ad was dismissed")
+                    loadInterstitialAd() // 광고가 닫힌 후 새 광고 로드
+                }
+                
+                override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                    Log.d("TAG", "Ad failed to show: ${adError.message}")
+                    loadInterstitialAd() // 광고 표시 실패 시 새 광고 로드
+                }
+                
+                override fun onAdShowedFullScreenContent() {
+                    Log.d("TAG", "Ad showed fullscreen content")
+                    mInterstitialAd = null // 광고가 표시되면 참조 해제
+                }
+            }
+            
+            mInterstitialAd?.show(this)
+        } else {
+            Log.d("TAG", "Interstitial ad is not ready yet")
+            loadInterstitialAd() // 광고가 준비되지 않았으면 다시 로드
         }
     }
 }
