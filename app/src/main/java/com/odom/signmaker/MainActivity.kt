@@ -1,7 +1,9 @@
 package com.odom.signmaker
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.media.MediaScannerConnection
 import android.net.Uri
@@ -75,7 +77,7 @@ class MainActivity : AppCompatActivity() {
     // 광고
     lateinit var mAdView : AdView
     private var mInterstitialAd: InterstitialAd? = null
-    private var signatureCount = 0
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +85,9 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
 
         setContentView(view)
+
+        // SharedPreferences 초기화
+        sharedPreferences = getSharedPreferences("SignMakerPrefs", Context.MODE_PRIVATE)
 
         checkPermission()
 
@@ -128,6 +133,16 @@ class MainActivity : AppCompatActivity() {
 
         binding.btRedraw.setOnClickListener {
             binding.signaturePad.clear()
+            
+            // SharedPreferences를 사용한 다시 그리기 카운터 증가 및 전면광고 표시
+            val redrawCount = sharedPreferences.getInt("redraw_count", 0) + 1
+            val editor = sharedPreferences.edit()
+            editor.putInt("redraw_count", redrawCount)
+            editor.apply()
+            
+            if (redrawCount % 3 == 0) {
+                showInterstitialAd()
+            }
         }
 
         binding.btSave.setOnClickListener {
@@ -228,9 +243,13 @@ class MainActivity : AppCompatActivity() {
 
             dialog.show()
 
-            // 서명 카운터 증가 및 전면광고 표시
-            signatureCount++
-            if (signatureCount % 4 == 0) {
+            // SharedPreferences를 사용한 서명 카운터 증가 및 전면광고 표시
+            val signatureCount = sharedPreferences.getInt("signature_count", 0) + 1
+            val editor = sharedPreferences.edit()
+            editor.putInt("signature_count", signatureCount)
+            editor.apply()
+            
+            if (signatureCount % 3 == 0) {
                 showInterstitialAd()
             }
 
