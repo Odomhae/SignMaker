@@ -17,7 +17,10 @@
 
     <string name="open_file">열기</string>
     <string name="cancel">취소</string>
+    <string name="exit_confirm">앱을 종료하시겠습니까?</string>
+    <string name="exit">종료</string>
     <string name="dark_theme_alert">다크테마에서는 서명이 안 보일 수 있습니다</string>
+    <string name="pen_width">펜 굵기</string>
 
 
 </resources>

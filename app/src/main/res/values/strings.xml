@@ -16,7 +16,10 @@
 
     <string name="open_file">Open</string>
     <string name="cancel">Cancel</string>
+    <string name="exit_confirm">Do you want to exit the app?</string>
+    <string name="exit">Exit</string>
     <string name="dark_theme_alert">Signature may not show clearly in dark mode.</string>
+    <string name="pen_width">Pen Thickness</string>
 
 
     <string name="TEST_FULLSCREEN_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/1033173712</string>

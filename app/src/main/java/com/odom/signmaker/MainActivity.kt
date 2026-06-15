@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.SharedPreferences
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
@@ -15,6 +17,8 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.GridLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
@@ -22,12 +26,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.github.gcacace.signaturepad.views.SignaturePad
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
@@ -38,9 +44,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.tasks.Task
 import com.google.android.play.core.review.ReviewInfo
 import com.google.android.play.core.review.ReviewManagerFactory
+import com.google.android.material.slider.Slider
 import com.odom.signmaker.databinding.ActivityMainBinding
-import me.jfenn.colorpickerdialog.dialogs.ColorPickerDialog
-import me.jfenn.colorpickerdialog.views.picker.RGBPickerView
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -50,17 +55,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
     lateinit var signBitmap : Bitmap
 
-    // 뒤로가기 2번 종료
-    var backPressTime = 0L
+    // 뒤로가기 시 종료 확인 다이얼로그 표시
     private val callback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            // 뒤로가기 클릭 시 실행시킬 코드
-            if (System.currentTimeMillis() - backPressTime > 2000){
-                backPressTime = System.currentTimeMillis()
-                Toast.makeText(this@MainActivity, R.string.alert_press_close , Toast.LENGTH_SHORT).show()
-            } else {
-                finish()
-            }
+            showExitDialog()
         }
     }
 
@@ -77,7 +75,27 @@ class MainActivity : AppCompatActivity() {
     // 광고
     lateinit var mAdView : AdView
     private var mInterstitialAd: InterstitialAd? = null
+    private var exitAdView: AdView? = null
     private lateinit var sharedPreferences: SharedPreferences
+
+    // 펜 색상 팔레트 - 흰 배경에서 잘 보이는 10색
+    private val penColors = intArrayOf(
+        0xFF000000.toInt(), // 검정
+        0xFF757575.toInt(), // 회색
+        0xFFD32F2F.toInt(), // 빨강
+        0xFFF57C00.toInt(), // 주황
+        0xFF5D4037.toInt(), // 갈색
+        0xFF388E3C.toInt(), // 초록
+        0xFF00796B.toInt(), // 청록
+        0xFF1976D2.toInt(), // 파랑
+        0xFF303F9F.toInt(), // 남색
+        0xFF7B1FA2.toInt(), // 보라
+        0xFFFBC02D.toInt(), // 노랑
+        0xFF03A9F4.toInt(), // 하늘
+        0xFFEC407A.toInt(), // 핑크
+        0xFF26A69A.toInt(), // 민트
+        0xFFFF7043.toInt()  // 코랄
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,6 +108,13 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences = getSharedPreferences("SignMakerPrefs", Context.MODE_PRIVATE)
 
         checkPermission()
+
+        // 광고 초기화 - 배너 / 전면 / 종료 다이얼로그용 배너 (onStart마다 재로드하지 않도록 onCreate에서 1회만)
+        MobileAds.initialize(this) {}
+        mAdView = binding.adMobView
+        mAdView.loadAd(AdRequest.Builder().build())
+        loadInterstitialAd()
+        loadExitBannerAd()
 
         // top, bottom padding
         val contentView: View = this.findViewById(android.R.id.content)
@@ -153,34 +178,29 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btChangecolor.setOnClickListener {
-            ColorPickerDialog()
-                .withTitle(resources.getString(R.string.select_pen_color))
-                .clearPickers()
-                .withPicker(RGBPickerView::class.java)
-                .withAlphaEnabled(false)
-                .withColor(resources.getColor(R.color.black)) // the default / initial color
-                .withListener { dialog, color ->
-                    binding.signaturePad.setPenColor(color)
-                    //todo 230720
-//                    binding.tvPencolor.setTextColor((resources.getColor(color)))
-//                    defaultPenColor = color
-                }
-                .show(supportFragmentManager, "colorPicker")
+            showPenSettingsDialog()
         }
 
+        // 저장된 펜 색/굵기 복원
+        applyPenSettings()
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
+        mAdView.resume()
+        exitAdView?.resume()
+    }
 
-        // load Banner AD
-        MobileAds.initialize(this) {}
-        mAdView = findViewById(R.id.adMobView)
-        val adRequest = AdRequest.Builder().build()
-        mAdView.loadAd(adRequest)
-        
-        // load Interstitial AD
-        loadInterstitialAd()
+    override fun onPause() {
+        mAdView.pause()
+        exitAdView?.pause()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        mAdView.destroy()
+        exitAdView?.destroy()
+        super.onDestroy()
     }
 
     fun saveImg(bitmap: Bitmap) {
@@ -214,9 +234,6 @@ class MainActivity : AppCompatActivity() {
             toast.setGravity(Gravity.TOP, 0, 200)
             toast.show()
 
-           // Toast.makeText(this, R.string.save_success, Toast.LENGTH_SHORT).show()
-            reviewApp()
-
             // 다이얼로그로 갤러리 열기 선택
             val dialogView = layoutInflater.inflate(R.layout.custom_dialog, null)
 
@@ -249,8 +266,11 @@ class MainActivity : AppCompatActivity() {
             editor.putInt("signature_count", signatureCount)
             editor.apply()
             
+            // 전면광고가 나오는 회차에는 리뷰 요청을 생략해 팝업이 겹치지 않도록 함
             if (signatureCount % 3 == 0) {
                 showInterstitialAd()
+            } else {
+                reviewApp()
             }
 
         } catch (e: IOException) {
@@ -337,6 +357,140 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
+    private fun applyPenSettings() {
+        binding.signaturePad.setPenColor(sharedPreferences.getInt("pen_color", penColors[0]))
+        val penWidth = sharedPreferences.getFloat("pen_width", 7f)
+        binding.signaturePad.setMaxWidth(penWidth)
+        binding.signaturePad.setMinWidth(penWidth * 0.4f)
+    }
+
+    // 펜 색상 10색 + 굵기 슬라이더 다이얼로그
+    private fun showPenSettingsDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_pen_settings, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        val grid = dialogView.findViewById<GridLayout>(R.id.colorGrid)
+        val density = resources.displayMetrics.density
+        var selectedColor = sharedPreferences.getInt("pen_color", penColors[0])
+
+        // "펜 굵기" 라벨 옆 미리보기 점 - 현재 색상/굵기를 점 크기로 표현
+        val preview = dialogView.findViewById<View>(R.id.widthPreview)
+        val slider = dialogView.findViewById<Slider>(R.id.widthSlider)
+        fun updatePreview() {
+            preview.background = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(selectedColor)
+            }
+            val dotSize = (slider.value * density).toInt()
+            preview.layoutParams = preview.layoutParams.apply {
+                width = dotSize
+                height = dotSize
+            }
+            preview.requestLayout()
+        }
+
+        // 선택된 색상에 굵은 테두리 + 체크 표시 (체크 색은 스와치 밝기에 따라 자동 대비)
+        fun updateSwatches() {
+            for (i in 0 until grid.childCount) {
+                val swatch = grid.getChildAt(i)
+                val selected = penColors[i] == selectedColor
+                swatch.background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(penColors[i])
+                    if (selected) {
+                        setStroke((3 * density).toInt(), ContextCompat.getColor(this@MainActivity, R.color.blue))
+                    } else {
+                        setStroke((1 * density).toInt(), 0x33000000)
+                    }
+                }
+                if (selected) {
+                    val check = ContextCompat.getDrawable(this@MainActivity, R.drawable.ic_check_mark)?.mutate()
+                    val checkColor = if (ColorUtils.calculateLuminance(penColors[i]) > 0.5) Color.BLACK else Color.WHITE
+                    check?.setTint(checkColor)
+                    swatch.foreground = check
+                    swatch.foregroundGravity = Gravity.CENTER
+                } else {
+                    swatch.foreground = null
+                }
+            }
+        }
+
+        val size = (40 * density).toInt()
+        val margin = (6 * density).toInt()
+        penColors.forEach { color ->
+            val swatch = View(this)
+            swatch.layoutParams = GridLayout.LayoutParams().apply {
+                width = size
+                height = size
+                setMargins(margin, margin, margin, margin)
+            }
+            swatch.setOnClickListener {
+                selectedColor = color
+                binding.signaturePad.setPenColor(color)
+                sharedPreferences.edit().putInt("pen_color", color).apply()
+                updateSwatches()
+                updatePreview()
+            }
+            grid.addView(swatch)
+        }
+        updateSwatches()
+
+        slider.value = sharedPreferences.getFloat("pen_width", 7f)
+        slider.addOnChangeListener { _, value, _ ->
+            binding.signaturePad.setMaxWidth(value)
+            binding.signaturePad.setMinWidth(value * 0.4f)
+            sharedPreferences.edit().putFloat("pen_width", value).apply()
+            updatePreview()
+        }
+        updatePreview()
+
+        dialogView.findViewById<Button>(R.id.confirmButton).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    // 종료 다이얼로그에 넣을 배너를 미리 로드해둔다
+    private fun loadExitBannerAd() {
+        exitAdView = AdView(this).apply {
+            adUnitId = getString(R.string.TEST_banner_ad_unit_id)
+            setAdSize(AdSize.MEDIUM_RECTANGLE)
+            loadAd(AdRequest.Builder().build())
+        }
+    }
+
+    private fun showExitDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_exit, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        // 미리 로드된 배너를 다이얼로그에 부착 (재사용을 위해 기존 부모에서 분리)
+        exitAdView?.let { ad ->
+            (ad.parent as? ViewGroup)?.removeView(ad)
+            dialogView.findViewById<FrameLayout>(R.id.exitAdContainer).addView(ad)
+        }
+
+        dialogView.findViewById<Button>(R.id.exitButton).setOnClickListener {
+            dialog.dismiss()
+            finish()
+        }
+
+        dialogView.findViewById<Button>(R.id.cancelExitButton).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        // 닫힐 때 배너를 떼어내 다음 표시 때 재사용
+        dialog.setOnDismissListener {
+            exitAdView?.let { ad -> (ad.parent as? ViewGroup)?.removeView(ad) }
+        }
+
+        dialog.show()
+    }
+
     private fun loadInterstitialAd() {
         val adRequest = AdRequest.Builder().build()
         

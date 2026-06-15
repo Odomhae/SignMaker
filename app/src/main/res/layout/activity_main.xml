@@ -37,46 +37,54 @@
         app:layout_constraintTop_toBottomOf="@+id/rl_color"
         app:layout_constraintBottom_toTopOf="@+id/rl_button"/>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/rl_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
         app:layout_constraintBottom_toTopOf="@+id/adMobView"
         android:layout_marginHorizontal="10dp"
         android:layout_marginBottom="20dp">
 
         <Button
             android:id="@+id/bt_redraw"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="14sp"
             android:textColor="@color/white"
-            android:text="@string/redraw">
-
-
-        </Button>
+            android:text="@string/redraw" />
 
         <Button
             android:id="@+id/bt_changecolor"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/bt_redraw"
-            android:layout_marginHorizontal="10dp"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="14sp"
             android:textColor="@color/white"
-            android:text="@string/changePenColor">
-        </Button>
+            android:text="@string/changePenColor" />
 
         <Button
             android:id="@+id/bt_save"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="14sp"
             android:textColor="@color/white"
-            android:text="@string/save">
+            android:text="@string/save" />
 
-        </Button>
-
-    </RelativeLayout>
+    </LinearLayout>
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adMobView"
