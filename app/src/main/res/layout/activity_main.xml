@@ -43,7 +43,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:baselineAligned="false"
-        app:layout_constraintBottom_toTopOf="@+id/adMobView"
+        app:layout_constraintBottom_toTopOf="@+id/adMobContainer"
         android:layout_marginHorizontal="10dp"
         android:layout_marginBottom="20dp">
 
@@ -86,13 +86,10 @@
 
     </LinearLayout>
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adMobView"
+    <FrameLayout
+        android:id="@+id/adMobContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:adSize="BANNER"
-        app:adUnitId="@string/TEST_banner_ad_unit_id">
-    </com.google.android.gms.ads.AdView>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -111,7 +111,10 @@ class MainActivity : AppCompatActivity() {
 
         // 광고 초기화 - 배너 / 전면 / 종료 다이얼로그용 배너 (onStart마다 재로드하지 않도록 onCreate에서 1회만)
         MobileAds.initialize(this) {}
-        mAdView = binding.adMobView
+        mAdView = AdView(this)
+        mAdView.adUnitId = getString(R.string.TEST_banner_ad_unit_id)
+        mAdView.setAdSize(adaptiveAdSize())
+        binding.adMobContainer.addView(mAdView)
         mAdView.loadAd(AdRequest.Builder().build())
         loadInterstitialAd()
         loadExitBannerAd()
@@ -362,6 +365,18 @@ class MainActivity : AppCompatActivity() {
         val penWidth = sharedPreferences.getFloat("pen_width", 7f)
         binding.signaturePad.setMaxWidth(penWidth)
         binding.signaturePad.setMinWidth(penWidth * 0.4f)
+    }
+
+    // 화면 폭에 맞춘 Anchored Adaptive Banner 사이즈
+    private fun adaptiveAdSize(): AdSize {
+        val metrics = resources.displayMetrics
+        val adWidthPixels = if (binding.adMobContainer.width > 0) {
+            binding.adMobContainer.width.toFloat()
+        } else {
+            metrics.widthPixels.toFloat()
+        }
+        val adWidth = (adWidthPixels / metrics.density).toInt()
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth)
     }
 
     // 펜 색상 10색 + 굵기 슬라이더 다이얼로그
