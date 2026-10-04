@@ -38,7 +38,11 @@ class SignMakerApplication : Application(),
     }
 
     // --- ActivityLifecycleCallbacks: currentActivity 추적 ---
-    override fun onActivityResumed(activity: Activity) { currentActivity = activity }
+    override fun onActivityResumed(activity: Activity) {
+        currentActivity = activity
+        // currentActivity가 세팅된 직후, 콜드 스타트 창에서 표시를 재시도 (로드가 onResume보다 빨랐던 경우 보완)
+        appOpenAdManager.onActivityAvailable()
+    }
     override fun onActivityPaused(activity: Activity) {
         if (currentActivity === activity) currentActivity = null
     }

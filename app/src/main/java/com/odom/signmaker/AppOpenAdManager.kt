@@ -86,6 +86,15 @@ class AppOpenAdManager(private val application: Application) {
         isColdStartPending = false
     }
 
+    /**
+     * 액티비티가 resume되어 표시 대상(currentActivity)이 생겼을 때 호출.
+     * 광고가 onResume보다 먼저 로드되는 레이스에서, onAdLoaded 시점에 currentActivity가
+     * 아직 null이라 건너뛴 경우를 보완한다. isColdStartPending 가드가 있어 중복/오표시는 없다.
+     */
+    fun onActivityAvailable() {
+        maybeShowForColdStart()
+    }
+
     private fun maybeShowForColdStart() {
         if (!isColdStartPending) return
         if (isShowingAd) return
