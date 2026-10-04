@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SignMaker_Make your signature</string>
+    <string name="app_name">SignMaker</string>
     <string name="redraw">Clear</string>
     <string name="save">Save</string>
     <string name="signHere">Sign Here</string>
@@ -14,10 +14,22 @@
     <string name="success_create_folder">A SignMaker folder has been created in the gallery</string>
     <string name="alert_press_close">Press once more to close the app</string>
 
+    <string name="open_file">Open</string>
+    <string name="cancel">Cancel</string>
+    <string name="exit_confirm">Do you want to exit the app?</string>
+    <string name="exit">Exit</string>
+    <string name="dark_theme_alert">Signature may not show clearly in dark mode.</string>
+    <string name="pen_width">Pen Thickness</string>
+
+
+    <string name="TEST_FULLSCREEN_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
     <string name="TEST_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
     <string name="TEST_admob_app_id" translatable="false"> ca-app-pub-3940256099942544~3347511713</string>
+    <string name="TEST_app_open_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/9257395921</string>
 
+    <string name="REAL_FULLSCREEN_ad_unit_id" translatable="false">ca-app-pub-6729344454320392/6541910190</string>
     <string name="REAL_banner_ad_unit_id" translatable="false">ca-app-pub-6729344454320392/5431659881</string>
     <string name="REAL_admob_app_id" translatable="false">ca-app-pub-6729344454320392~8704690482</string>
+    <string name="REAL_app_open_ad_unit_id" translatable="false">ca-app-pub-6729344454320392/1091955859</string>
 
 </resources>
