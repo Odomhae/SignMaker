@@ -25,9 +25,12 @@
     <string name="TEST_FULLSCREEN_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
     <string name="TEST_banner_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/6300978111</string>
     <string name="TEST_admob_app_id" translatable="false"> ca-app-pub-3940256099942544~3347511713</string>
+    <string name="TEST_app_open_ad_unit_id" translatable="false">ca-app-pub-3940256099942544/9257395921</string>
 
     <string name="REAL_FULLSCREEN_ad_unit_id" translatable="false">ca-app-pub-6729344454320392/6541910190</string>
     <string name="REAL_banner_ad_unit_id" translatable="false">ca-app-pub-6729344454320392/5431659881</string>
     <string name="REAL_admob_app_id" translatable="false">ca-app-pub-6729344454320392~8704690482</string>
+    <!-- 배포 전 AdMob 콘솔에서 "앱 오프닝" 유형 광고단위 생성 후 실제 ID로 교체 필요. 현재 값은 더미. -->
+    <string name="REAL_app_open_ad_unit_id" translatable="false">ca-app-pub-6729344454320392/0000000000</string>
 
 </resources>

@@ -16,20 +16,25 @@ class SignMakerApplication : Application(),
     var currentActivity: Activity? = null
         private set
 
+    lateinit var appOpenAdManager: AppOpenAdManager
+        private set
+
     override fun onCreate() {
         super<Application>.onCreate()
         MobileAds.initialize(this) {}
+        appOpenAdManager = AppOpenAdManager(this)
+        appOpenAdManager.loadAd()
         registerActivityLifecycleCallbacks(this)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
     }
 
-    // ProcessLifecycleOwner: 앱이 포그라운드로 진입할 때 호출 - Task 3에서 앱오픈 표시 연결
+    // ProcessLifecycleOwner: 앱이 포그라운드로 진입할 때 호출
     override fun onStart(owner: LifecycleOwner) {
-        // Task 3에서 구현
+        appOpenAdManager.onAppForegrounded()
     }
 
     override fun onStop(owner: LifecycleOwner) {
-        // Task 3에서 구현
+        appOpenAdManager.onAppBackgrounded()
     }
 
     // --- ActivityLifecycleCallbacks: currentActivity 추적 ---
