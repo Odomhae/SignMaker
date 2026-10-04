@@ -36,7 +36,6 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -110,7 +109,6 @@ class MainActivity : AppCompatActivity() {
         checkPermission()
 
         // 광고 초기화 - 배너 / 전면 / 종료 다이얼로그용 배너 (onStart마다 재로드하지 않도록 onCreate에서 1회만)
-        MobileAds.initialize(this) {}
         mAdView = AdView(this)
         mAdView.adUnitId = getString(R.string.TEST_banner_ad_unit_id)
         mAdView.setAdSize(adaptiveAdSize())
